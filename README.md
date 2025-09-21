@@ -333,6 +333,52 @@ import { AuthModule } from '@cycube/nest-oidc';
 export class AppModule {}
 ```
 
+## Multiple Realms
+
+You can use multiple realms (or multiple issuers) by configuring the `AuthModule` with the `realms` array:
+
+```ts
+import { Module } from '@nestjs/common';
+import { AuthModule } from '@cycube/nest-oidc';
+
+@Module({
+  imports: [
+    ...
+    AuthModule.forRoot({
+      realms: [
+        {
+          realm: 'one',
+          oidcAuthority: 'http://iam.app.com/auth/realms/one',
+        }, {
+          realm: 'two',
+          oidcAuthority: 'http://iam.app.com/auth/realms/two',
+        }, {
+          realm: 'three',
+          oidcAuthority: 'http://iam.anotherapp.com/auth/realms/three',
+          jwtMapper: ... ,      // specific, for this realm only
+          roleEvaluators: ... , // specific, for this realm only
+        }
+      ],
+      jwtMapper: ... ,      // global for all realms
+      roleEvaluators: ... , // global for all realms
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+Some notes about multi-realm configurations:
+
+1. This feature relies on the `iss` (issuer) field of generated JWT tokens. Each realm must have a unique `iss` string that maps to the `oidcAuthority` of the realm for this to work. It was tested against Keycloak v26.3.4 but is expected to work with other OIDC providers.
+
+2. A custom `jwtMapper` can be set either globally or per-realm. Realms with no `jwtMapper` will inherit the value from the global one.
+
+3. Same rule applies for `roleEvaluators`.
+
+4. When registering `AuthModule`, if a `realms` array is provided, the global `oidcAuthority` is redundant and ignored.
+
+
+
 ## Advanced
 
 #### Authenticating GraphQL Subscriptions
