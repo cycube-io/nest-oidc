@@ -1,6 +1,6 @@
 {
   "name": "@cycube/nest-oidc",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "An OIDC authentication module for NestJS APIs",
   "homepage": "https://github.com/cycube-io/nest-oidc#readme",
   "author": "Oren Chapo <oren+npm@cycube.io>",

@@ -1,3 +1,11 @@
+# [2.2.1](https://github.com/cycube-io/nest-oidc/compare/v2.2.0...v2.2.1) (2025-09-22)
+
+### Bug Fixes
+
+* **auth.service:** broken due to incorrect init of jexl
+
+
+
 # [2.2.0](https://github.com/cycube-io/nest-oidc/compare/v2.1.0...v2.2.0) (2025-09-21)
 
 
