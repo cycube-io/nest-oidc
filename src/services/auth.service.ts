@@ -9,7 +9,7 @@ import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
 import { JWT_MAPPER, OIDC_AUTHORITY, REALMS, ROLE_EVALUATORS } from '../consts';
 import { RoleEvaluator } from '../interfaces';
-import jexl from 'jexl';
+import { Jexl } from 'jexl';
 import {
   createRemoteJWKSet,
   decodeJwt,
@@ -25,6 +25,7 @@ const length = (elem: any) => (elem ? elem.length : 0);
 const mapValue = (obj: any) =>
   obj ? obj.map((value: any) => ({ value })) : [];
 
+const jexl = new Jexl();
 jexl.addTransform('length', length);
 jexl.addTransform('mapValue', mapValue);
 
