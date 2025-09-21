@@ -16,6 +16,7 @@ This package is a maintained fork of [@5stones/nest-oidc](https://github.com/5-s
 - [Roles](#roles)
 - [Role Evaluators](#role-evaluators)
 - [JWT Mapping](#jwt-mapping)
+- [Multiple Realms](#multiple-realms)
 - [Advanced](#advanced)
   - [Authenticating GraphQL Subscriptions](#authenticating-graphql-subscriptions)
   - [Optional Authentication](#optional-authentication)
