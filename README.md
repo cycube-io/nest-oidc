@@ -2,6 +2,9 @@
 
 A configurable OIDC library for NestJS and GraphQL or REST.
 
+This package is a maintained fork of [@5stones/nest-oidc](https://github.com/5-stones/nest-oidc) by Jacob Spizziri.
+
+
 - [Install](#install)
 - [Basic Setup & Usage](#basic-setup--usage)
 - [Guards](#guards)
@@ -17,13 +20,14 @@ A configurable OIDC library for NestJS and GraphQL or REST.
   - [Authenticating GraphQL Subscriptions](#authenticating-graphql-subscriptions)
   - [Optional Authentication](#optional-authentication)
 - [Release](#release)
+- [Credits](#credits)
 
 ## Install
 
 Install `nest-oidc`:
 
 ```sh
-npm i @5stones/nest-oidc
+npm i @cycube/nest-oidc
 ```
 
 Install it's peer dependencies:
@@ -44,7 +48,7 @@ the issuer's public key. You must pass configure a value for the `oidcAuthority`
 
 ```ts
 import { Module } from '@nestjs/common';
-import { AuthModule } from '@5stones/nest-oidc';
+import { AuthModule } from '@cycube/nest-oidc';
 
 @Module({
   imports: [
@@ -76,7 +80,7 @@ of the controller endpoints:
 
 ```ts
 import { Controller, Get, UseGuards } from '@nestjs/common';
-import { Roles, JwtAuthGuard } from '@5stones/nest-oidc';
+import { Roles, JwtAuthGuard } from '@cycube/nest-oidc';
 
 @UseGuards(JwtAuthGuard)
 @Controller('cats')
@@ -92,7 +96,7 @@ You can also use it on specific endpoints:
 
 ```ts
 import { Controller, Get, Post, UseGuards } from '@nestjs/common';
-import { Roles, JwtAuthGuard } from '@5stones/nest-oidc';
+import { Roles, JwtAuthGuard } from '@cycube/nest-oidc';
 
 @Controller('cats')
 export class CatsController {
@@ -117,7 +121,7 @@ of the controller endpoints:
 ```ts
 import { UseGuards } from '@nestjs/common';
 import { Resolver } from '@nestjs/graphql';
-import { JwtAuthGuardGraphQL } from '@5stones/nest-oidc';
+import { JwtAuthGuardGraphQL } from '@cycube/nest-oidc';
 
 @UseGuards(JwtAuthGuardGraphQL)
 @Resolver(() => Cat)
@@ -131,7 +135,7 @@ You can also use it on specific endpoints:
 ```ts
 import { UseGuards } from '@nestjs/common';
 import { Resolver, Query, Mutation } from '@nestjs/graphql';
-import { JwtAuthGuardGraphQL } from '@5stones/nest-oidc';
+import { JwtAuthGuardGraphQL } from '@cycube/nest-oidc';
 
 @Resolver(() => Cat)
 export class CatResolver {
@@ -160,7 +164,7 @@ This package exports two basic user decorators:
 
 ```ts
 import { Controller, Get, UseGuards } from '@nestjs/common';
-import { Roles, JwtAuthGuard, CurrentUser } from '@5stones/nest-oidc';
+import { Roles, JwtAuthGuard, CurrentUser } from '@cycube/nest-oidc';
 
 @UseGuards(JwtAuthGuard)
 @Controller('cats')
@@ -179,7 +183,7 @@ export class CatsController {
 ```ts
 import { UseGuards } from '@nestjs/common';
 import { Resolver, Query } from '@nestjs/graphql';
-import { JwtAuthGuardGraphQL, CurrentUserGraphQL } from '@5stones/nest-oidc';
+import { JwtAuthGuardGraphQL, CurrentUserGraphQL } from '@cycube/nest-oidc';
 
 @UseGuards(JwtAuthGuardGraphQL)
 @Resolver(() => Cat)
@@ -206,7 +210,7 @@ of strings.
 ```ts
 import { UseGuards } from '@nestjs/common';
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
-import { JwtAuthGuardGraphQL, Roles } from '@5stones/nest-oidc';
+import { JwtAuthGuardGraphQL, Roles } from '@cycube/nest-oidc';
 
 @UseGuards(JwtAuthGuardGraphQL)
 @Resolver(() => Cat)
@@ -270,7 +274,7 @@ role in your application.
 
 ```ts
 import { Module } from '@nestjs/common';
-import { AuthModule } from '@5stones/nest-oidc';
+import { AuthModule } from '@cycube/nest-oidc';
 
 @Module({
   imports: [
@@ -311,7 +315,7 @@ if you need to map the JWT payload to different structure you can pass the
 
 ```ts
 import { Module } from '@nestjs/common';
-import { AuthModule } from '@5stones/nest-oidc';
+import { AuthModule } from '@cycube/nest-oidc';
 
 @Module({
   imports: [
@@ -426,3 +430,7 @@ e.g.
 npm version 1.2.17
 npm version patch // 1.2.17 -> 1.2.18
 ```
+
+## Credits
+- Original work by [Jacob Spizziri](https://github.com/jspizziri).
+- Maintained fork by [Oren Chapo](https://github.com/OrenChapo).

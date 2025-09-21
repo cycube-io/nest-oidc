@@ -1,3 +1,14 @@
+# [2.2.0](https://github.com/cycube-io/nest-oidc/compare/v2.1.0...v2.2.0) (2025-09-21)
+
+
+### Features
+
+* **dependencies:** drop `passport-jwt` / `jsonwebtoken` in favor of `jose` since they cannot verify EdDSA signatures ([8566ae7](https://github.com/cycube-io/nest-oidc/commit/8566ae7fdd1d8c1795b9f568328d4b44d2d79b13))
+
+* **oidc:** support multi-realm configurations ([8566ae7](https://github.com/cycube-io/nest-oidc/commit/8566ae7fdd1d8c1795b9f568328d4b44d2d79b13))
+
+
+
 # [2.1.0](https://github.com/5-stones/nest-oidc/compare/v2.0.1...v2.1.0) (2025-04-17)
 
 
