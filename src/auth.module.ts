@@ -2,15 +2,23 @@ import { Module, DynamicModule } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
 import { PassportModule } from '@nestjs/passport';
 
-import { JWT_MAPPER, OIDC_AUTHORITY, ROLE_EVALUATORS } from './consts';
+import { JWT_MAPPER, OIDC_AUTHORITY, ROLE_EVALUATORS, REALMS } from './consts';
 import { RoleEvaluator } from './interfaces';
 import { AuthService } from './services';
 import { JwtStrategy } from './strategies';
 
-export interface AuthModuleRegistrationOptions {
+export interface AuthModuleRealmOptions {
+  realm: string;
   oidcAuthority: string;
   roleEvaluators?: RoleEvaluator[];
   jwtMapper?: (payload: any) => any;
+}
+
+export interface AuthModuleRegistrationOptions {
+  oidcAuthority?: string;
+  roleEvaluators?: RoleEvaluator[];
+  jwtMapper?: (payload: any) => any;
+  realms?: AuthModuleRealmOptions[];
 }
 
 @Module({})
@@ -37,7 +45,11 @@ export class AuthModule {
           provide: JWT_MAPPER,
           useValue: options.jwtMapper
             ? options.jwtMapper
-            : (payload) => payload,
+            : (payload: any) => payload,
+        },
+        {
+          provide: REALMS,
+          useValue: options.realms || [],
         },
       ],
     };

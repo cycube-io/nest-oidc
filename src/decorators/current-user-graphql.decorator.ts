@@ -1,6 +1,8 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 
-let graphql;
+let graphql: {
+  GqlExecutionContext: { create: (ec: ExecutionContext) => any };
+};
 try {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   graphql = require('@nestjs/graphql');

@@ -1,4 +1,8 @@
-export { AuthModule, AuthModuleRegistrationOptions } from './auth.module';
+export {
+  AuthModule,
+  AuthModuleRegistrationOptions,
+  AuthModuleRealmOptions,
+} from './auth.module';
 
 export * from './decorators';
 export * from './guards';

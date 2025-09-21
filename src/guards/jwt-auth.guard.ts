@@ -6,7 +6,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 
-import { IS_AUTHENTICATION_OPTIONAL_TOKEN, ROLES_TOKEN } from 'src/decorators';
+import { IS_AUTHENTICATION_OPTIONAL_TOKEN, ROLES_TOKEN } from '../decorators';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {

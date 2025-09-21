@@ -1,7 +1,9 @@
 import { Injectable, ExecutionContext } from '@nestjs/common';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
-let graphql;
+let graphql: {
+  GqlExecutionContext: { create: (ec: ExecutionContext) => any };
+};
 try {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   graphql = require('@nestjs/graphql');
