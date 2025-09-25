@@ -1,57 +1,65 @@
 import {
   Injectable,
+  CanActivate,
   ExecutionContext,
   UnauthorizedException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { AuthGuard } from '@nestjs/passport';
-
-import { IS_AUTHENTICATION_OPTIONAL_TOKEN, ROLES_TOKEN } from '../decorators';
+import { AuthService } from '../services/auth.service';
+import { ROLES_TOKEN, TOKEN_FROM, TokenSource } from '../decorators';
 
 @Injectable()
-export class JwtAuthGuard extends AuthGuard('jwt') {
-  constructor(protected readonly reflector: Reflector) {
-    super();
-  }
-
-  getRequest(context: ExecutionContext) {
-    return context.switchToHttp().getRequest();
-  }
+export class JwtAuthGuard implements CanActivate {
+  constructor(
+    private reflector: Reflector,
+    private authService: AuthService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const isAuthOptional = this.reflector.get<boolean>(
-      IS_AUTHENTICATION_OPTIONAL_TOKEN,
-      context.getHandler(),
-    );
+    const request = context.switchToHttp().getRequest();
 
+    // Extract token
+    const tokenSource: TokenSource =
+      this.reflector.getAllAndOverride(TOKEN_FROM, [
+        context.getHandler(),
+        context.getClass(),
+      ]) || 'header';
+
+    let token: string | undefined;
+
+    if (tokenSource === 'header') {
+      const auth = request.headers['authorization'] as string | undefined;
+      if (auth?.startsWith('Bearer '))
+        token = auth.slice('Bearer '.length).trim();
+    } else if (tokenSource === 'query') {
+      token = request.query['auth'] as string | undefined;
+    }
+
+    if (!token) throw new UnauthorizedException('Missing token');
+
+    // Verify token and attach user
+    let user;
     try {
-      await super.canActivate(context);
+      const payload = await this.authService.verifyToken(token);
+      user = await this.authService.validate(payload);
+      request.user = user;
     } catch (err) {
-      const isUnauthorized = err instanceof UnauthorizedException;
-      if (!isUnauthorized || (isUnauthorized && !isAuthOptional)) {
-        throw err;
-      }
+      throw new UnauthorizedException(`Invalid token: ${String(err)}`);
     }
 
-    const roles = this.reflector.get<string[]>(
-      ROLES_TOKEN,
-      context.getHandler(),
-    );
-    if (!roles) {
-      return true;
+    // Enforce roles
+    const requiredRoles: string[] =
+      this.reflector.getAllAndOverride<string[]>(ROLES_TOKEN, [
+        context.getHandler(),
+        context.getClass(),
+      ]) || [];
+
+    if (requiredRoles.length > 0) {
+      const hasRole = requiredRoles.some((role) => user.roles?.includes(role));
+      if (!hasRole) throw new ForbiddenException('Insufficient role');
     }
 
-    const request = this.getRequest(context);
-    const user = request.user;
-
-    if (!user) {
-      return true;
-    } else {
-      return (
-        user &&
-        user.roles &&
-        user.roles.some((role: string) => roles.includes(role))
-      );
-    }
+    return true;
   }
 }

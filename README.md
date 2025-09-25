@@ -1,24 +1,22 @@
 # NestJS OIDC
 
-A configurable OIDC library for NestJS and GraphQL or REST.
+A configurable OIDC library for NestJS and REST.
 
-This package is a maintained fork of [@5stones/nest-oidc](https://github.com/5-stones/nest-oidc) by Jacob Spizziri.
+This package is a fork of [@5stones/nest-oidc](https://github.com/5-stones/nest-oidc) by Jacob Spizziri. Unlike the original, this fork removes the use of `@nestjs/passport` and `jsonwebtoken`, replacing them with `jose` to enable caching and support efficient algorithms such as Ed25519. It also omits GraphQL support for simplicity. If you need GraphQL support, please use the original package instead.
 
 
 - [Install](#install)
 - [Basic Setup & Usage](#basic-setup--usage)
 - [Guards](#guards)
   - [REST](#rest-guard)
-  - [GraphQL](#graphql-guard)
 - [Current User](#current-user)
   - [REST](#rest-user)
-  - [GraphQL](#graphql-user)
 - [Roles](#roles)
 - [Role Evaluators](#role-evaluators)
 - [JWT Mapping](#jwt-mapping)
 - [Multiple Realms](#multiple-realms)
 - [Advanced](#advanced)
-  - [Authenticating GraphQL Subscriptions](#authenticating-graphql-subscriptions)
+  - [Token From Query](#token-from-query)
   - [Optional Authentication](#optional-authentication)
 - [Release](#release)
 - [Credits](#credits)
@@ -31,21 +29,12 @@ Install `nest-oidc`:
 npm i @cycube/nest-oidc
 ```
 
-Install it's peer dependencies:
-
-```sh
-npm i @nestjs/jwt @nestjs/passport passport passport-jwt
-```
-
-:warning: Note: If you're using this package for GraphQL you'll need the
-corresponding GQL libraries installed.
-[Please follow the NestJS documentation first.](https://docs.nestjs.com/graphql/quick-start)
 
 ## Basic Setup & Usage
 
 You'll need to import and configure the `AuthModule` in your application. This
-package contains a JWT authentication strategy which will validate a JWT against
-the issuer's public key. You must pass configure a value for the `oidcAuthority`.
+package contains a JWT authentication guard which will validate a JWT against
+the issuer's public key. You must pass configure a value either for the `oidcAuthority` or a `realms` array with at least one realm (see [Multiple Realms](#multiple-realms)).
 
 ```ts
 import { Module } from '@nestjs/common';
@@ -62,17 +51,16 @@ import { AuthModule } from '@cycube/nest-oidc';
 export class AppModule {}
 ```
 
-This will add the JWT validation strategy, and will verify any incoming JWT's
+This will add the JWT validation guard, and will verify any incoming JWT's
 against the OIDC authorities public keys.
 
 Finally, you should decorate your endpoints with the provided guards.
 
 ## Guards
 
-This package exports two basic guards:
+This package exports a basic guard:
 
 - `JwtAuthGuard` - for use in REST contexts.
-- `JwtAuthGuardGraphQL` - for use in GQL contexts.
 
 #### REST Guard
 
@@ -114,52 +102,11 @@ export class CatsController {
 }
 ```
 
-#### GraphQL Guard
-
-Applying the guard will require a valid JWT to be passed in order to access any
-of the controller endpoints:
-
-```ts
-import { UseGuards } from '@nestjs/common';
-import { Resolver } from '@nestjs/graphql';
-import { JwtAuthGuardGraphQL } from '@cycube/nest-oidc';
-
-@UseGuards(JwtAuthGuardGraphQL)
-@Resolver(() => Cat)
-export class CatResolver {
-  ...
-}
-```
-
-You can also use it on specific endpoints:
-
-```ts
-import { UseGuards } from '@nestjs/common';
-import { Resolver, Query, Mutation } from '@nestjs/graphql';
-import { JwtAuthGuardGraphQL } from '@cycube/nest-oidc';
-
-@Resolver(() => Cat)
-export class CatResolver {
-
-  @Query(() => [Cat], { name: 'allCats' })
-  async findAll() {
-    ...
-  }
-
-  @UseGuards(JwtAuthGuardGraphQL)
-  @Mutation(() => Cat, { name: 'createCat' })
-  async create() {
-    ...
-  }
-}
-```
-
 ## Current User
 
-This package exports two basic user decorators:
+This package exports a basic user decorator:
 
 - `CurrentUser` - for use in REST contexts.
-- `CurrentUserGraphQL` - for use in GQL contexts.
 
 #### REST User
 
@@ -178,30 +125,10 @@ export class CatsController {
 ```
 
 
-#### GraphQL User
-
-
-```ts
-import { UseGuards } from '@nestjs/common';
-import { Resolver, Query } from '@nestjs/graphql';
-import { JwtAuthGuardGraphQL, CurrentUserGraphQL } from '@cycube/nest-oidc';
-
-@UseGuards(JwtAuthGuardGraphQL)
-@Resolver(() => Cat)
-export class CatResolver {
-
-  @Query(() => [Cat], { name: 'allCats' })
-  async findAll(@CurrentUserGraphQL() user: any) {
-    ...
-  }
-}
-```
-
 ## Roles
 
 If you want to permission different endpoints based on properties of the JWT you
-can do so using the `Roles` decorator in conjunction with the Auth Guards (both
-REST & GQL). The `Roles` decorator will accept a list of `string`s and will
+can do so using the `Roles` decorator in conjunction with the Auth Guard. The `Roles` decorator will accept a list of `string`s and will
 check if the user object accessing that endpoint has any of those strings in the
 `user.roles` property. It expects the `user.roles` property to be a flat array
 of strings.
@@ -209,40 +136,30 @@ of strings.
 #### Example
 
 ```ts
-import { UseGuards } from '@nestjs/common';
-import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
-import { JwtAuthGuardGraphQL, Roles } from '@cycube/nest-oidc';
+import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Roles, JwtAuthGuard } from '@cycube/nest-oidc';
 
-@UseGuards(JwtAuthGuardGraphQL)
-@Resolver(() => Cat)
-export class CatResolver {
-
-  @Query(() => [Cat], { name: 'allCats' })
-  async findAll(): Promise<Cat[]> {
-    ...
-  }
-
-  @Roles()
-  @Query(() => Cat, { name: 'Cat' })
-  async findOne(@Args('id', { type: () => ID }) id: number): Promise<Cat> {
-    ...
+@UseGuards(JwtAuthGuard)
+@Controller('cats')
+export class CatsController {
+  @Get()
+  findAll(): string {
+    return 'This action returns all cats';
   }
 
   @Roles('ADMIN', 'SUPER_ADMIN')
-  @Mutation(() => Cat, { name: 'createCat' })
-  async create(): Promise<Cat> {
-    ...
+  @Delete()
+  findAll(id: string): string {
+    return 'This action deletes a cat';
   }
 }
 ```
 
-In this scenario, the mutation can only be executed by an `ADMIN` or `SUPER_ADMIN`
+In this scenario, the deletion can only be executed by an `ADMIN` or `SUPER_ADMIN`
 but the query can be executed by any user with a valid JWT.
 
 :warning: Note: if you do not pass _any_ roles parameters to the `Roles`
 decorator (i.e. `@Roles()`) it is the same as not adding the decorator at all.
-That is to say, any scenario above the `findAll` and the `findOne` queries
-behave identically.
 
 ## Role Evaluators
 
@@ -334,6 +251,7 @@ import { AuthModule } from '@cycube/nest-oidc';
 export class AppModule {}
 ```
 
+
 ## Multiple Realms
 
 You can use multiple realms (or multiple issuers) by configuring the `AuthModule` with the `realms` array:
@@ -382,73 +300,29 @@ Some notes about multi-realm configurations:
 
 ## Advanced
 
-#### Authenticating GraphQL Subscriptions
+#### Token From Query
 
-The websocket spec doesn't support headers, so if you want to authenticate a
-GraphQL Subscription via the standard Guard & Role decorators you can do so, but
-you'll need to modify your `GraphQLModule` configuration. The below example will
-walk you through how to do it with the `graphql-ws` library.
+By default, the JWT token is extracted from the `authorization` request header. In some cases, like a short-lived URL for an external user, you may want to construct a URL which contains a JWT token in the request query string:
 
-The first step is to make sure that you're passing the Auth token as a parameter
-through your websocket request. [Read more in the `graphql-ws` docs](https://github.com/enisdenjo/graphql-ws#user-content-apollo-client)
+https://my-api/cats/show?auth=eyJhbGc...
 
-Next you'll need to modify the `GraphQLModule`'s `onConnect` and `context`
-functions to map the token and the request. You [can read the NestJS documentation](https://docs.nestjs.com/graphql/subscriptions#authentication-over-websocket)
-on generally how to do this, but that documentation only deals with the validation
-of the token directly in the `onConnect` function. However to allow it to be
-done by the Guards you'll need to map the token into a header on a request object
-and then ensure that you're always returning a request to be processed by the
-`JwtStrategy`. See the example below:
-
+This can be done for either a single endpoint or an entire controller using the `@TokenFrom` decorator:
 
 ```ts
-// app.module.ts
-...
-import type { Context } from 'graphql-ws';
+import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Roles, JwtAuthGuard, TokenFrom } from '@cycube/nest-oidc';
 
-...
-@Module({
-  imports: [
-    GraphQLModule.forRoot({
-      ...
-      subscriptions: {
-        'graphql-ws': {
-          onConnect: (context: Context<any>) => {
-            const { connectionParams, extra } = context;
-            const authToken = connectionParams?.Authorization;
-
-            if (authToken) {
-              // Add the auth token to the request object provided by `graphql-ws`
-              // NOTE: headers are lowercased in express. Using `Authorization`
-              // will result in a failure to authenticate.
-              extra.request.headers.authorization = authToken;
-            }
-          },
-        }
-      },
-      context: (context) => {
-        if (context?.req === undefined) {
-          // The jwt strategy requires a request with headers to perform jwt
-          // validation. If no request exists in the context object then we're
-          // dealing with a websocket connection. In that case pass along the
-          // request object provided by the `graphql-ws` context for validation.
-          context.req = context.extra.request;
-        }
-
-        // return the context object.
-        return context;
-      },
-    }),
-    ...
-  ],
-})
-export class AppModule implements NestModule {
-  ...
+@Controller('cats')
+@UseGuards(JwtAuthGuard)
+export class CatsController {
+  @TokenFrom('query')
+  @Roles('EXTERNAL_USER')
+  @Get('/show')
+  showCat(): string {
+    return 'This action shows a specific cat';
+  }
 }
 ```
-
-Once this has been configured you'll be able to apply the `JwtAuthGuardGraphQL`
-and `Roles` decorators as you would on any other resolver, query, or mutation.
 
 #### Optional Authentication
 

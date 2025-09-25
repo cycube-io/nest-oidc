@@ -1,11 +1,9 @@
 import { Module, DynamicModule } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
-import { PassportModule } from '@nestjs/passport';
 
 import { JWT_MAPPER, OIDC_AUTHORITY, ROLE_EVALUATORS, REALMS } from './consts';
 import { RoleEvaluator } from './interfaces';
 import { AuthService } from './services';
-import { JwtStrategy } from './strategies';
 
 export interface AuthModuleRealmOptions {
   realm: string;
@@ -26,13 +24,9 @@ export class AuthModule {
   static forRoot(options: AuthModuleRegistrationOptions): DynamicModule {
     return {
       module: AuthModule,
-      imports: [
-        HttpModule,
-        PassportModule.register({ defaultStrategy: 'jwt' }),
-      ],
+      imports: [HttpModule],
       providers: [
         AuthService,
-        JwtStrategy,
         {
           provide: OIDC_AUTHORITY,
           useValue: options.oidcAuthority,
@@ -52,6 +46,7 @@ export class AuthModule {
           useValue: options.realms || [],
         },
       ],
+      exports: [AuthService],
     };
   }
 }

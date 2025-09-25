@@ -1,6 +1,6 @@
 {
   "name": "@cycube/nest-oidc",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "description": "An OIDC authentication module for NestJS APIs",
   "homepage": "https://github.com/cycube-io/nest-oidc#readme",
   "author": "Oren Chapo <oren+npm@cycube.io>",
@@ -14,44 +14,39 @@
     "nestjs",
     "nest.js",
     "oidc",
-    "sso"
+    "sso",
+    "eddsa",
+    "ed25519"
   ],
   "main": "dist/index.js",
   "scripts": {
     "build": "npx nest build",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "test": "jest --passWithNoTests",
-    "test:watch": "jest --watch",
-    "test:cov": "jest --coverage",
+    "format": "npx prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "lint": "npx eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "test": "npx jest --passWithNoTests",
+    "test:watch": "npx jest --watch",
+    "test:cov": "npx jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:e2e": "npx jest --config ./test/jest-e2e.json",
     "version": "npm run changelog && git add CHANGELOG.md",
     "postversion": "npm run publish:git && npm run publish:npm",
     "publish:git": "git push && git push --tags",
     "publish:npm": "npm run build && npm publish --access public",
-    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0"
+    "changelog": "npx conventional-changelog -p angular -i CHANGELOG.md -s -r 0"
   },
   "dependencies": {
     "jexl": "^2.3.0",
-    "jose": "^6.1.0",
-    "passport-custom": "^1.1.1"
+    "jose": "^6.1.0"
   },
   "peerDependencies": {
     "@apollo/gateway": "*",
     "@nestjs/axios": "^1.0.0 || ^2.0.0 || ^3.0.0 || ^4.0.0",
     "@nestjs/common": "^9.0.0 || ^10.0.0 || ^11.0.0",
     "@nestjs/core": "^9.0.0 || ^10.0.0 || ^11.0.0",
-    "@nestjs/graphql": "*",
-    "@nestjs/passport": "*",
-    "passport": "*",
     "reflect-metadata": "*"
   },
   "peerDependenciesMeta": {
     "@apollo/gateway": {
-      "optional": true
-    },
-    "@nestjs/graphql": {
       "optional": true
     }
   },
@@ -62,8 +57,6 @@
     "@nestjs/cli": "^11.0.6",
     "@nestjs/common": "^11.0.19",
     "@nestjs/core": "^11.0.19",
-    "@nestjs/graphql": "^13.1.0",
-    "@nestjs/passport": "^11.0.5",
     "@nestjs/schematics": "^11.0.5",
     "@nestjs/testing": "^11.0.19",
     "@types/express": "^5.0.1",
