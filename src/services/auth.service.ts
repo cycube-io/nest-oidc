@@ -154,7 +154,12 @@ export class AuthService implements OnModuleInit {
       const { payload } = await jwtVerify(rawJwtToken, jwks, verifyOptions);
       return payload as JWTPayload;
     } catch (err) {
-      this.logger.error(`Token verification failed: ${String(err)}`);
+      const errStr = `${String(err)}`;
+      if (errStr.startsWith('JWTExpired:')) {
+        this.logger.log(`Token expired: ${errStr}`);
+      } else {
+        this.logger.error(`Token verification failed: ${errStr}`);
+      }
       throw err;
     }
   }
