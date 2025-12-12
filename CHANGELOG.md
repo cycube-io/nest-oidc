@@ -1,3 +1,12 @@
+## [2.3.1](https://github.com/cycube-io/nest-oidc/compare/v2.3.0...v2.3.1) (2025-12-12)
+
+
+### Bug Fixes
+
+* **auth.service:** reduce logging level for JWTExpired ([cff0fee](https://github.com/cycube-io/nest-oidc/commit/cff0fee1201d98cf81eb4136319053d95e4448e1))
+
+
+
 # [2.3.0](https://github.com/cycube-io/nest-oidc/compare/2.2.1...2.3.0) (2025-09-25)
 
 

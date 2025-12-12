@@ -1,3 +1,5 @@
+[![npm version](https://img.shields.io/npm/v/@cycube/nest-oidc.svg)](https://www.npmjs.com/package/@cycube/nest-oidc) [![downloads](https://img.shields.io/npm/dt/@cycube/nest-oidc.svg)](https://www.npmjs.com/package/@cycube/nest-oidc)
+
 # NestJS OIDC
 
 A configurable OIDC library for NestJS and REST.
