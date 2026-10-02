@@ -1,7 +1,7 @@
 export {
   AuthModule,
-  AuthModuleRegistrationOptions,
-  AuthModuleRealmOptions,
+  type AuthModuleRegistrationOptions,
+  type AuthModuleRealmOptions,
 } from './auth.module';
 
 export * from './decorators';

@@ -1,1 +1,1 @@
-export { RoleEvaluator } from './role-evaluator';
+export { type RoleEvaluator } from './role-evaluator';

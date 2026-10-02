@@ -1,7 +1,6 @@
 import { defineConfig, globalIgnores } from 'eslint/config';
-import typescriptEslintEslintPlugin from '@typescript-eslint/eslint-plugin';
+import tseslint from 'typescript-eslint';
 import globals from 'globals';
-import tsParser from '@typescript-eslint/parser';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import js from '@eslint/js';
@@ -18,27 +17,19 @@ const compat = new FlatCompat({
 export default defineConfig([
   globalIgnores(['**/.eslintrc.js']),
   {
-    extends: compat.extends(
-      'plugin:@typescript-eslint/recommended',
-      'plugin:prettier/recommended',
-    ),
-
-    plugins: {
-      '@typescript-eslint': typescriptEslintEslintPlugin,
-    },
+    extends: [
+      js.configs.recommended,
+      tseslint.configs.recommended,
+      compat.extends(
+        'plugin:@typescript-eslint/recommended',
+        'plugin:prettier/recommended',
+      ),
+    ],
 
     languageOptions: {
       globals: {
         ...globals.node,
         ...globals.jest,
-      },
-
-      parser: tsParser,
-      ecmaVersion: 5,
-      sourceType: 'commonjs',
-
-      parserOptions: {
-        project: 'tsconfig.json',
       },
     },
 
